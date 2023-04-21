@@ -8,9 +8,7 @@ const Registration = () => {
         FirstName:z.string().min(2,{ message: "Firstname can't be less than 2 character" }).max(10,
     { message: "Firstname can't be more than 10 character" }
             ),
-        LastName:z.string().min(2,{ message: "Lastname can't be less than 2 character" }).max(10,
-            { message: "Lastname can't be more than 10 character" }
-                    ),
+        LastName:z.string().optional(),
         Email:z.string().min(1,{message:"Email can't be empty"}).email({message:"must be a valid email"}),
         Age:z.number().min(18,{message:"Age must be greater than 18"}).max(70,{
             message:"Age must be less than 80"
@@ -22,10 +20,27 @@ const Registration = () => {
         Terms:z.literal(true,{
             errorMap: () => ({ message: "You must accept Terms and Conditions" }),
           })
-    }).refine((data)=>data.Password===data.ConfirmPassword,{
-        message:"Password do not match",
-        path:["ConfirmPassword"]
     })
+    .superRefine((data,ctx)=>{
+      if(data.ConfirmPassword!==data.Password){
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path:["ConfirmPassword"],
+          message: `Confirm Password Should be same as password`,
+        });
+      }
+      if(data.Email?.includes("@yopmail")){
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path:["Email"],
+          message: `Yopmail not supported`,
+        });
+      }
+    })
+    // .refine((data)=>data.Password===data.ConfirmPassword,{
+    //     message:"Password do not match",
+    //     path:["ConfirmPassword"]
+    // })
     const {register,control,handleSubmit,formState,watch,getValues,setValue,setError}=useForm(
         {
         resolver:zodResolver(schema),
@@ -36,7 +51,6 @@ const Registration = () => {
           Age:0,
           Password:"",
           ConfirmPassword:"",
-
         }
     })
     const {errors}=formState
@@ -155,7 +169,6 @@ const Registration = () => {
             />
                           <p className="text-red-700">{errors?.LastName?.message}</p>
           </div>
-
           <div className="col-span-6 sm:col-span-3">
             <label htmlFor="Email" className="block text-sm font-medium text-gray-700">
               Email
