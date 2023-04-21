@@ -4,6 +4,13 @@ import { useForm} from "react-hook-form";
 import { DevTool } from "@hookform/devtools";
 import { zodResolver } from '@hookform/resolvers/zod';
 const Registration = () => {
+  const baseCategorySchema = 
+    z.tuple([
+      z.string().min(10,{message:"Phone Number can't be less than 10 Character"}),
+      z.string().optional(),
+    ])
+    // z.string().min(10,{message:"Phone Number Can't be less than 10 Character"}),z.string().min(5,{message:"Phone num"})
+    
     const schema=z.object({
         FirstName:z.string().min(2,{ message: "Firstname can't be less than 2 character" }).max(10,
     { message: "Firstname can't be more than 10 character" }
@@ -16,6 +23,7 @@ const Registration = () => {
         Password:z.string().min(8,{message:"Password must be greater than 7 digits"}).max(10,{
             message:"Password must be less than 10 digits"
         }),
+        PhoneNumber:baseCategorySchema,
         ConfirmPassword:z.string().min(8).max(10),
         Terms:z.literal(true,{
             errorMap: () => ({ message: "You must accept Terms and Conditions" }),
@@ -50,6 +58,7 @@ const Registration = () => {
           Email:"crpritamSaha@gmail.com",
           Age:0,
           Password:"",
+          PhoneNumber:["",""],
           ConfirmPassword:"",
         }
     })
@@ -233,6 +242,44 @@ const Registration = () => {
                           <p className="text-red-700">{errors?.ConfirmPassword?.message}</p>
 
           </div>
+
+
+          <div className="col-span-6 sm:col-span-3">
+            <label
+              htmlFor="PhoneNumber"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Phone Number
+            </label>
+
+            <input
+              type="text"
+              id="PhoneNumber"
+              {...register("PhoneNumber.0")}
+              className="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm"
+            />
+              {errors?.PhoneNumber?.length >0 && <p className="text-red-700">{errors?.PhoneNumber[0]?.message}</p> }
+
+          </div>
+
+          <div className="col-span-6 sm:col-span-3">
+            <label
+              htmlFor="additionalPhone"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Additional Phone Number
+            </label>
+
+            <input
+              type="text"
+              id="additionalphone"
+              {...register("PhoneNumber.1")}
+              className="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm"
+            />
+                          {/* <p className="text-red-700">{errors?.ConfirmPassword?.message}</p> */}
+
+          </div>
+
 
           <div className="col-span-6">
             <label htmlFor="Terms" className="flex gap-4">
