@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { z } from "zod";
-import { useForm} from "react-hook-form";
+import { useFieldArray, useForm} from "react-hook-form";
 import { DevTool } from "@hookform/devtools";
 import { zodResolver } from '@hookform/resolvers/zod';
 const Registration = () => {
@@ -9,6 +9,13 @@ const Registration = () => {
       z.string().min(10,{message:"Phone Number can't be less than 10 Character"}),
       z.string().optional(),
     ])
+    const socialSchema = z.object({
+      twitter: z.string().optional(),
+      facebook: z.string().optional(),
+    });
+    const CouponcodeSchema = z.array(z.object({
+      number: z.string().min(1,{message:"Coupon Code can't be less than 1 digit"}),
+    }));
     // z.string().min(10,{message:"Phone Number Can't be less than 10 Character"}),z.string().min(5,{message:"Phone num"})
     
     const schema=z.object({
@@ -24,6 +31,8 @@ const Registration = () => {
             message:"Password must be less than 10 digits"
         }),
         PhoneNumber:baseCategorySchema,
+        social:socialSchema,
+        CouponCode:CouponcodeSchema,
         ConfirmPassword:z.string().min(8).max(10),
         Terms:z.literal(true,{
             errorMap: () => ({ message: "You must accept Terms and Conditions" }),
@@ -59,6 +68,13 @@ const Registration = () => {
           Age:0,
           Password:"",
           PhoneNumber:["",""],
+          social:{
+            twitter:"",
+            facebook:""
+          },
+          CouponCode:[{
+            number:""
+          }],
           ConfirmPassword:"",
         }
     })
@@ -67,6 +83,10 @@ const Registration = () => {
     const onSubmit=(data)=>{
           console.log("data",data);
        }
+       const {fields,append,remove}=useFieldArray({
+        name:"CouponCode",
+        control
+      })
   return (
 <section className="bg-white">
   <div className="lg:grid lg:min-h-screen lg:grid-cols-12">
@@ -209,6 +229,37 @@ const Registration = () => {
           </div>
           <div className="col-span-6 sm:col-span-3">
             <label
+              htmlFor="twitter"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Twitter
+            </label>
+
+            <input
+              type="text"
+              id="twitter"
+              className="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm"
+              {...register("social.twitter")}
+            />
+          </div>
+
+          <div className="col-span-6 sm:col-span-3">
+            <label
+              htmlFor="facebook"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Facebook
+            </label>
+
+            <input
+              type="text"
+              id="facebook"
+              {...register("social.facebook")}
+              className="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm"
+            />
+          </div>
+          <div className="col-span-6 sm:col-span-3">
+            <label
               htmlFor="Password"
               className="block text-sm font-medium text-gray-700"
             >
@@ -280,7 +331,42 @@ const Registration = () => {
 
           </div>
 
-
+          <div className="col-span-6">
+            <label
+              htmlFor="LastName"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Coupon Code
+            </label>
+            {fields?.map((field,index)=>(
+                <div key={index} className='flex mb-2'>
+                  <input
+                type="text"
+                {...register(`CouponCode.${index}.number`)}
+              />
+              {
+                fields?.length >1 && 
+                <button type="button" onClick={()=>remove(index)}> 
+                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+                </button>
+               
+              }
+              {errors?.CouponCode?.length >0 && 
+              <p className="text-red-700">
+              {errors?.CouponCode[index]?.number?.message}
+            </p> 
+              }
+              {/* */}
+                </div>
+               ))}
+            <button type="button" onClick={()=>append({numbers:""})}> 
+               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+</svg>
+    </button>
+          </div>
           <div className="col-span-6">
             <label htmlFor="Terms" className="flex gap-4">
               <input
